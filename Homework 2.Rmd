@@ -1,0 +1,90 @@
+---
+title: "Homework 2"
+author: "Emily Chen"
+date: "2025-09-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1
+
+This dataset has a list of world's 200 tallest buildings, including their name, height, number of floors, construction status, year of completion, primary matieral, and function. I will investigate whether there's a relationship between a building's height and its year of completion.
+
+# Question 2
+
+```{r}
+library(formatR)
+library(ggplot2)
+buildings <- read.csv('Homework2_TallestBuildings.csv')
+
+buildings$height_in_feet <- buildings$Height * 3.28084
+
+ggplot(buildings)+geom_histogram(aes(x= height_in_feet,)) + labs(title = "Distribution of the world's tallest buildings by height (feet)") 
+
+
+
+
+round(IQR(buildings$height_in_feet, na.rm=TRUE),2)
+round(median(buildings$height_in_feet, na.rm=TRUE),2)
+
+
+```
+
+Paragraph describing the distribution: The tallest 200 buildings range from 951 feet to 3,281 feet. The average height is apx 1,285.6 feet. The median is 1202.4. The IQR is 309.22. The histogram illustrates right skewed distribution.
+
+# Question 3
+
+```{r}
+library(ggplot2)
+
+Completed <- subset(buildings, Status == "Completed")
+
+#I learned the subset function in a datacamp website. Here's the [link] https://www.datacamp.com/doc/r/subset 
+
+ggplot(Completed, aes(x = CompletionYear, y = height_in_feet)) + geom_point(color = "pink", alpha = 0.9) + labs(title = "Relationship Between Completion Year and Heights",
+       x = "Completion Year",
+       y = "Height (feet)") 
+
+
+
+
+round(sd(Completed$height_in_feet),2)
+round(cor(buildings$height_in_feet, buildings$CompletionYear),2)
+# it wouldn't give me a pearson correlation, because in the dataset Competitionyeaer for Tsingshan Holdings Group Global Headquarters Tower is not present. 
+
+```
+
+Short Paragraph: From the completed buildings,the average height of the completed building is 1349 feet. The median height is 1258 feet. There is a moderately strong positive correlation between year of completion and building height.
+
+# Question 4
+
+Research Question: Is there a relationship between the height of completed skyscrapers and those still under construction?
+
+```{r}
+ggplot(buildings, aes(x = Status, y = height_in_feet, fill = Status)) +
+  geom_boxplot(alpha = 0.5, outlier.color = "red") +
+  labs(title = "Height Comparison: Completed vs. Under Construction Buildings",
+       x = "Building Status",
+       y = "Height (feet)") +
+  scale_fill_manual(values = c("Completed" = "green", "Under construction" = "red")) +
+  theme(legend.position = "right")
+
+UnderConstruction <- subset(buildings, Status == "Under construction")
+
+Completed <- subset(buildings, Status == "Completed")
+
+#I learned the subset function in the datacamp website. Here's the [link] https://www.datacamp.com/doc/r/subset 
+
+
+summary(Completed$Height)
+summary(UnderConstruction$height)
+```
+
+Paragraph: The boxplot comparison shows that the skyscrapers under construction tend to be a little taller on average than the ones that's already completed. Under construction skyscrapers median height is 1086
+
+# Question 5
+
+I have investigated the world's 200 tallest buildings to explore patterns in their height, years of completion, and construction status. The results of these graphs illustrated that skyscrapers currently under construction tend to be taller on average than completed ones. The dataset was obtained from [link](https://www.ctbuh.org/)
