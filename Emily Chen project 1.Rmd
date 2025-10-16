@@ -1,0 +1,261 @@
+---
+title: "Emily Chen SDS Project 1"
+author: "Emily Chen"
+date: "2025-10-06"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+    number_section: true
+    theme: readable
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Introduction 
+
+My dataset is about alcohol usage and alcohol policies. I got this dataset from  QUEEN’S University BELFAST website [https://pure.qub.ac.uk/en/datasets/dataset-1-for-alcohol-consumption-and-attitudes-to-evidence-based ] 
+```{r echo=FALSE, fig.align='center', out.width="80%"}
+
+knitr::include_graphics("https://www.henryford.com/-/media/project/hfhs/henryford/henry-ford-blog/images/mobile-interior-banner-images/2021/07/alcohol-and-cancer-risk.jpg?h=600&iar=0&w=640&hash=4A39C223413DB0896E158D75897A44C8")
+
+```
+
+
+[https://www.henryford.com/-/media/project/hfhs/henryford/henry-ford-blog/images/mobile-interior-banner-images/2021/07/alcohol-and-cancer-risk.jpg?h=600&iar=0&w=640&hash=4A39C223413DB0896E158D75897A44C8]
+
+<span style='color:green; font-weight:bold;font-size: 18px;'> Research Questions: 
+1. What's the different between male and female drinking frequency 
+2. For weekly drinker, is there an association between strong and weak support for alcohol policies? 
+
+
+# Data Preparation 
+
+```{r Echo = FALSE, message=FALSE}
+
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(plyr)
+#graduate TA helped me with library(plyr)
+
+alcohol <- read.csv('Alcohol_use_and_alcohol_policy_student_data (1).csv')
+#I renamed the file to alcohol 
+
+clean_alcohol <- na.omit(alcohol)
+# I removed all the NA values 
+
+
+clean_alcohol$sex = as.character(clean_alcohol$sex)
+clean_alcohol$sex[which(clean_alcohol$sex == '1')] = 'Male'
+clean_alcohol$sex[which(clean_alcohol$sex == '2')] = 'Female'
+clean_alcohol$sex[which(clean_alcohol$sex == '3')] = 'Trans'
+# I converted sex respond from 1 to Male, 2 to Female and 3 to trans for better analysis 
+
+
+clean_alcohol$marital = as.character(clean_alcohol$marital)
+clean_alcohol$marital[which(clean_alcohol$marital == '1')] = 'Married or currently cohabiting' 
+clean_alcohol$marital[which(clean_alcohol$marital == '2')] = 'single (never married)'
+clean_alcohol$marital[which(clean_alcohol$marital == '3')] = 'prefer not to say'
+
+# I converted marital status respond from 1 to married, and etc, and I did the same for all other variables.  
+
+clean_alcohol$Q95_12 = as.character(clean_alcohol$Q95_12)
+clean_alcohol$Q95_12[which(clean_alcohol$Q95_12 == '1')] = 'Strongly agree' 
+clean_alcohol$Q95_12[which(clean_alcohol$Q95_12 == '2')] = 'Agree' 
+clean_alcohol$Q95_12[which(clean_alcohol$Q95_12 == '3')] = 'Neutral' 
+clean_alcohol$Q95_12[which(clean_alcohol$Q95_12 == '4')] = 'Disagree' 
+clean_alcohol$Q95_12[which(clean_alcohol$Q95_12 == '5')] = 'Strongly disagree'
+
+
+
+clean_alcohol$Q6 = as.character(clean_alcohol$Q6)
+clean_alcohol$Q6[which(clean_alcohol$Q6 == '1')] = '1 or 2'
+clean_alcohol$Q6[which(clean_alcohol$Q6 == '2')] = '3 or 4'
+clean_alcohol$Q6[which(clean_alcohol$Q6 == '3')] = '5 or 6'
+clean_alcohol$Q6[which(clean_alcohol$Q6 == '4')] = '7 to 9'
+clean_alcohol$Q6[which(clean_alcohol$Q6 == '5')] = '10 or more'
+clean_alcohol$Q6[which(clean_alcohol$Q6 == '6')] = '0'
+
+
+clean_alcohol = rename(clean_alcohol, c('Q6' = 'drinking_freq', 'Q95_12' = 'Underage_drinking_is_a_problem'))
+
+#graduate TA helped me with renaming the x variable name.
+#I renamed the title for x and y 
+
+
+```
+
+
+<span style='color:orange;font-size: 18px;'> First, I imported my dataset into RStudio. Then, I cleaned the data by removing all rows with missing (NA) values. I also recoded several variables for clarity. For example, I renamed Q6 and Q95_12 to reflect the actual question content, so the dataset would be easier to understand. 
+
+<span style='color:orange;font-size: 18px;'> In addition, I also recoded the responses for the gender question: participants who answered '1' were recoded as Male, '2' as Female, and '3' as Trans. I also grouped responses for Q6: for example, '1 or 2' were combined into 1 category, and '3' or 4 into another. Moreover, for Q95_12, I recoded the numeric responses into their corresponding labels: '1' = Strongly Agree, '2' = Agree, '3' = Neutral, '4' = Disagree, '5' = Strongly Disagree. 
+
+<span style='color:orange; font-size: 18px;'> One of the challenges I faced was trying to rename the variables. 
+
+#These are paragraphs answering question 1 
+
+
+# Variable Descriptions 
+
+
+```{r Echo = FALSE, message=FALSE}
+
+Final_Clean_data <- subset(clean_alcohol, select = c(sex, age, marital, drinking_freq, Underage_drinking_is_a_problem))
+
+
+data.frame(Variable = c('sex', 'age', 'marital' , 'drinking_freq', 'underage_drinking'), Type = c('Categorical', 'Numeric', 'Categorical', 'Categorical','Categorical'), Descriptions = c('Gender identity', 'age in years' , 'Marital Status', 'how often do they drink', 'Do they think underage_drinking_is_a_problem' ) )
+
+
+```
+
+
+
+
+# Univariate Analyses 
+
+```{r Echo = FALSE, message=FALSE}
+ggplot(Final_Clean_data, aes(x = age)) + 
+ geom_boxplot(fill = 'pink') + 
+  labs(title = 'Distribution of Age', x = 'age', y = 'Count')
+
+summary(Final_Clean_data$age)
+sd(Final_Clean_data$age, na.rm = TRUE)
+
+# This is the code for the 1st numeric variable 
+
+```
+<span style='color:pink;font-size: 18px;'>This graph shows the age of participants ranged from 18 to 58 years old, with a mean age of 23 and a median of 21. The standard deviation was 6.7 showing moderate variability in the age of respondents. This graph also suggest a relatively young sample with a right skewed distribution. 
+
+
+
+
+```{r Echo = FALSE, message=FALSE}
+ggplot(Final_Clean_data, aes(x = marital)) + geom_bar (fill = 'blue') + labs(title = "Marital Status Distribution", x= 'Marital Status', y = 'count')
+
+
+count(Final_Clean_data$marital)
+
+# This is the code for the 1/4 categorical variable 
+```
+
+<span style='color:blue;font-size: 18px;'>In this graph is shows that 138 of respondents were single, 17 were married, and 6 prefer not to say. This distribution shows that most participants were not currently married, which may shows a younger age group. 
+
+
+```{r Echo = FALSE, message=FALSE}
+ggplot(Final_Clean_data, aes(x=sex)) + geom_bar(fill = 'green') + labs(title = 'sex Distributions', x = 'sex' , y = 'count')
+
+summary(Final_Clean_data$age)
+count(Final_Clean_data$sex)
+# this is the code for the 2/4 categorical variable 
+```
+<span style='color:green;font-size: 18px;'> This graph shows that 100 of the respondents were female, 59 were male, and 2 were trans. More than half of the respondents identified as female. 
+
+
+```{r Echo = FALSE, message=FALSE}
+ggplot(Final_Clean_data, aes(Underage_drinking_is_a_problem)) + geom_bar(fill = 'purple') + labs(title = 'Underage drinking is a problem Distribution', x = 'underage drinking is a problem' , y = 'count')
+
+summary(Final_Clean_data$Underage_drinking_is_a_problem)
+count(Final_Clean_data$Underage_drinking_is_a_problem)
+# This is the code for the 3/4 categorical variable
+
+```
+
+<span style='color:purple;font-size: 18px;'> This graph shows that 29 people agree underage drinking is a problem, 101 people think that is not a problem, and 31 people neither agree or disagree. 
+
+
+```{r}
+ggplot(Final_Clean_data, aes(drinking_freq)) + geom_bar(fill = 'grey') + labs(title = 'Drinking Frequency Distribution' , x = 'Drinking frequency' , y = 'count')
+
+summary(Final_Clean_data$drinking_freq)
+count(Final_Clean_data$drinking_freq)
+# this is the code for the 4/4 categorical variable
+
+```
+<span style='color:grey;font-size: 18px;'> This graph shows 16 people don't drink at all, 26 people drink 1 or 2, 23 people had 10 or more, 29 people had 3 or 4, 36 people had 5 or 6, and 31 people had 7 to 9 in the past year. Only a very small number of respondents respond with 0 drinks, showing that alcohol consumption is prevalent in this group. 
+
+
+
+
+
+
+
+# Bivariate Analyses 
+
+```{r Echo = FALSE, message=FALSE}
+
+ggplot(Final_Clean_data, aes(x = drinking_freq, fill = sex )) + 
+  geom_bar(position = 'dodge') + labs(title = 'Drinking Frequency By Sex', x = 'Drinking Frequency', y = 'count')
+
+table(Final_Clean_data$drinking_freq, Final_Clean_data$sex)
+# This is the code for Bivariate analyses 1/5
+
+
+```
+This graph compares drinking frequency across gender groups. 59% of female reported they have had 5 or more drinks in the past year. 50% of male reported they have had 5 or more drinks in the past year. <b> This suggests that female may drink more frequently than males in this sample.  
+
+```{r Echo = FALSE, message=FALSE}
+ggplot(Final_Clean_data, aes(x = Underage_drinking_is_a_problem, fill = sex )) + 
+  geom_bar(position = 'dodge') + labs(title = 'Underage Drinking is a problem by sex', x = 'Underage Drinking is a Problem', y = 'count')
+
+```
+
+
+This graph shows comparison between whether underage drinking is considered a problem across different gender groups. Majority of females believe that Underage drinking is not a problem. 
+
+```{r Echo = FALSE, message=FALSE}
+ggplot(Final_Clean_data, aes(x = drinking_freq, fill = Underage_drinking_is_a_problem )) + 
+  geom_bar(position = 'dodge') + labs(title = 'Policy supprot by drinking freq', x = 'drinking freq', y = 'count')
+
+table(Final_Clean_data$sex, Final_Clean_data$drinking_freq)
+#this is the code for the bivariate analyses 3/5
+```
+This graph shows a comparison between how support for alcohol-related policies varies across different levels of drinking frequency. <b> Heavier drinks are less supportive of alcohol policies, while non-drinks and occasional drinkers are more likely to be supportive. 
+
+
+
+
+
+
+```{r Echo = FALSE, message=FALSE}
+ggplot(Final_Clean_data, aes(x = drinking_freq, fill = marital)) + geom_bar(position = 'dodge') +
+  labs(title = 'Drinking freq by marital status' , x = 'drinking_freq' , y = 'count')
+
+
+table(Final_Clean_data$drinking_freq, Final_Clean_data$marital)
+```
+
+This graph shows comparison between drinking frequency and marital status. This graph suggests that people who are single tend to have a higher frequency of drinking, while married individuals may show more moderate drinking frequencies. 
+
+```{r Echo = FALSE, message=FALSE}
+ggplot(Final_Clean_data, aes(x = drinking_freq, y = age, fill = sex)) + geom_boxplot() + labs(title = "Age Distribution by Drinking Frequency and Sex", x = 'Drinkning Frequency' , y = "age")
+table(Final_Clean_data$age, Final_Clean_data$sex, Final_Clean_data$drinking_freq)
+```
+This graph shows the age distribution for each drinking frequency category and different gender. This graph suggests those who drinks are typically older than those who do not.  
+
+
+
+
+
+
+
+# Choice Elements
+I chose A. Use 5 or more in-line codes within my report, B. include at least 2 working hyperlinks within my report, D. Include a floating table of contents to allow easy navigation across sections, C. Change the default font style, size or color of the text in part of my report,  and H. Within the bivariate analysis section, include at least one multivariate plot that displays the relationship among three or more variables of interest. 
+
+
+
+
+# Conclusion 
+This analysis shows patterns in alcohol consumption and policy attitudes across different genders. Results showed that males are more likely to drink frequently compare to females. In addition, age and marital status also associated with drinking behavior. Those who are older and single tend to have a higher drinking frequency. Moreover, there's also a correlation between agree with alcohol policies and drinking frequency. Participants who disagree with alcohol policies tend to have a higher drinking frequency.  
+Future research: We can explore how social or cultural factors shape both drinking behavior and public opinion. 
+
+
+# References 
+These are all the sources I used through out my project. 
+[https://pure.qub.ac.uk/en/datasets/dataset-1-for-alcohol-consumption-and-attitudes-to-evidence-based]
+This website will have all the link to access the data. They also have variables sheet in
+PDF format along with the .csv file and some other files.
